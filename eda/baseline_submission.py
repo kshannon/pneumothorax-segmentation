@@ -104,3 +104,11 @@ with open(r"../data/x_train", "wb") as output_file:
     
 with open(r"../data/y_train", "wb") as output_file:
     cPickle.dump(Y_train, output_file)
+
+# TODO: check for pickle files, if exists import, if not run script
+# 
+# TODO: add in hooks for tf.data and keras dataloader from pickle scripts
+# 
+# TODO: u0net baseline
+# 
+# TODO: output submission script (import as module) 
