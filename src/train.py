@@ -18,7 +18,8 @@ validation_data = DataGenerator(im_path="dicom-images-train/*/*/*.dcm",
 
 model = unet_model()
 
-model.compile(optimizer="adam",loss=dice_coef_loss,
+opt = K.optimizers.Adam() #(lr=1e-6)
+model.compile(optimizer=opt,loss=dice_coef_loss,
               metrics=[dice_coef, soft_dice_coef])
 
 

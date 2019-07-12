@@ -118,7 +118,7 @@ class DataGenerator(K.utils.Sequence):
                     rle_string = self.mask_df[self.mask_df .index == img_name].values[msk_idx][0]
                     y[idx, :, :, 0] += self.rle2mask(rle_string)
 
-            else:
+            elif num_masks == 0:
 
                 rle_string = self.mask_df[self.mask_df.index == img_name].values[0][0]
 
@@ -128,6 +128,10 @@ class DataGenerator(K.utils.Sequence):
                     num_masks_array[idx] = 0
                 else:
                     y[idx, :, :, 0] = self.rle2mask(rle_string)
+
+            else:
+                y[idx, :, :, 0] = np.zeros((self.height, self.width))
+                num_masks_array[idx] = 0
 
 
         y[y>1] = 1  # If mask value > 1, then it is 1.
