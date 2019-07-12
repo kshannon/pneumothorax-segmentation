@@ -77,41 +77,41 @@ def unet_model():
                         padding="same")
 
     encodeA = K.layers.Conv2D(name="encodeAa", filters=fms, **params)(inputs)
-    encodeA = K.layers.BatchNorm()(encodeA)
+    encodeA = K.layers.BatchNormalization()(encodeA)
     encodeA = K.layers.Conv2D(name="encodeAb", filters=fms, **params)(encodeA)
-    encodeA = K.layers.BatchNorm()(encodeA)
+    encodeA = K.layers.BatchNormalization()(encodeA)
     poolA = K.layers.MaxPooling2D(name="poolA", pool_size=(2, 2))(encodeA)
 
     encodeB = K.layers.Conv2D(name="encodeBa", filters=fms*2, **params)(poolA)
-    encodeB = K.layers.BatchNorm()(encodeB)
+    encodeB = K.layers.BatchNormalization()(encodeB)
     encodeB = K.layers.Conv2D(
         name="encodeBb", filters=fms*2, **params)(encodeB)
-    encodeB = K.layers.BatchNorm()(encodeB)
+    encodeB = K.layers.BatchNormalization()(encodeB)
     poolB = K.layers.MaxPooling2D(name="poolB", pool_size=(2, 2))(encodeB)
 
     encodeC = K.layers.Conv2D(name="encodeCa", filters=fms*4, **params)(poolB)
-    encodeC = K.layers.BatchNorm()(encodeC)
+    encodeC = K.layers.BatchNormalization()(encodeC)
     encodeC = K.layers.SpatialDropout2D(dropout)(encodeC)
     encodeC = K.layers.Conv2D(
         name="encodeCb", filters=fms*4, **params)(encodeC)
-    encodeC = K.layers.BatchNorm()(encodeC)
+    encodeC = K.layers.BatchNormalization()(encodeC)
 
     poolC = K.layers.MaxPooling2D(name="poolC", pool_size=(2, 2))(encodeC)
 
     encodeD = K.layers.Conv2D(name="encodeDa", filters=fms*8, **params)(poolC)
-    encodeD = K.layers.BatchNorm()(encodeD)
+    encodeD = K.layers.BatchNormalization()(encodeD)
     encodeD = K.layers.SpatialDropout2D(dropout)(encodeD)
     encodeD = K.layers.Conv2D(
         name="encodeDb", filters=fms*8, **params)(encodeD)
-    encodeD = K.layers.BatchNorm()(encodeD)
+    encodeD = K.layers.BatchNormalization()(encodeD)
 
     poolD = K.layers.MaxPooling2D(name="poolD", pool_size=(2, 2))(encodeD)
 
     encodeE = K.layers.Conv2D(name="encodeEa", filters=fms*16, **params)(poolD)
-    encodeE = K.layers.BatchNorm()(encodeE)
+    encodeE = K.layers.BatchNormalization()(encodeE)
     encodeE = K.layers.Conv2D(
         name="encodeEb", filters=fms*16, **params)(encodeE)
-    encodeE = K.layers.BatchNorm()(encodeE)
+    encodeE = K.layers.BatchNormalization()(encodeE)
 
     up = K.layers.UpSampling2D(name="upE", size=(2, 2),
                                    interpolation="bilinear")(encodeE)
@@ -120,10 +120,10 @@ def unet_model():
 
     decodeC = K.layers.Conv2D(
         name="decodeCa", filters=fms*8, **params)(concatD)
-    decodeC = K.layers.BatchNorm()(decodeC)
+    decodeC = K.layers.BatchNormalization()(decodeC)
     decodeC = K.layers.Conv2D(
         name="decodeCb", filters=fms*8, **params)(decodeC)
-    decodeC = K.layers.BatchNorm()(decodeC)
+    decodeC = K.layers.BatchNormalization()(decodeC)
 
     up = K.layers.UpSampling2D(name="upC", size=(2, 2),
                                    interpolation="bilinear")(decodeC)
@@ -133,10 +133,10 @@ def unet_model():
 
     decodeB = K.layers.Conv2D(
         name="decodeBa", filters=fms*4, **params)(concatC)
-    decodeB = K.layers.BatchNorm()(decodeB)
+    decodeB = K.layers.BatchNormalization()(decodeB)
     decodeB = K.layers.Conv2D(
         name="decodeBb", filters=fms*4, **params)(decodeB)
-    decodeB = K.layers.BatchNorm()(decodeB)
+    decodeB = K.layers.BatchNormalization()(decodeB)
 
     up = K.layers.UpSampling2D(name="upB", size=(2, 2),
                                    interpolation="bilinear")(decodeB)
@@ -146,10 +146,10 @@ def unet_model():
 
     decodeA = K.layers.Conv2D(
         name="decodeAa", filters=fms*2, **params)(concatB)
-    decodeA = K.layers.BatchNorm()(decodeA)
+    decodeA = K.layers.BatchNormalization()(decodeA)
     decodeA = K.layers.Conv2D(
         name="decodeAb", filters=fms*2, **params)(decodeA)
-    decodeA = K.layers.BatchNorm()(decodeA)
+    decodeA = K.layers.BatchNormalization()(decodeA)
 
     up = K.layers.UpSampling2D(name="upA", size=(2, 2),
                                    interpolation="bilinear")(decodeA)
@@ -158,9 +158,9 @@ def unet_model():
         [up, encodeA], axis=concat_axis, name="concatA")
 
     convOut = K.layers.Conv2D(name="convOuta", filters=fms, **params)(concatA)
-    convOut = K.layers.BatchNorm()(convOut)
+    convOut = K.layers.BatchNormalization()(convOut)
     convOut = K.layers.Conv2D(name="convOutb", filters=fms, **params)(convOut)
-    convOut = K.layers.BatchNorm()(convOut)
+    convOut = K.layers.BatchNormalization()(convOut)
 
     prediction = K.layers.Conv2D(name="PredictionMask",
                                  filters=num_chan_out, kernel_size=(1, 1),
