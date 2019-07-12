@@ -120,7 +120,7 @@ class DataGenerator(K.utils.Sequence):
 
             else:
 
-                rle_string = self.mask_df[self.mask_df .index == img_name].values[0][0]
+                rle_string = self.mask_df[self.mask_df.index == img_name].values[0][0]
 
                 if rle_string == " -1" or rle_string == " -1":
                     y[idx, :, :, 0] = np.zeros((self.height, self.width))

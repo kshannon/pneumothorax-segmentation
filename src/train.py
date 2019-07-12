@@ -8,12 +8,12 @@ from dataloader import DataGenerator
 
 training_data = DataGenerator(im_path="dicom-images-train/*/*/*.dcm",
                               rle_csv="train-rle.csv", testing=False,
-                              batch_size=64,
+                              batch_size=16,
                               shuffle=True)
 
 validation_data = DataGenerator(im_path="dicom-images-train/*/*/*.dcm",
                               rle_csv="train-rle.csv", testing=True,
-                              batch_size=64,
+                              batch_size=16,
                               shuffle=False)
 
 model = unet_model()
