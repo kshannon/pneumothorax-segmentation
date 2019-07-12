@@ -7,8 +7,14 @@ from model import dice_coef, soft_dice_coef, unet_model, dice_coef_loss
 from dataloader import DataGenerator
 
 training_data = DataGenerator(im_path="dicom-images-train/*/*/*.dcm",
-                              rle_csv="train-rle.csv", batch_size=64,
+                              rle_csv="train-rle.csv", testing=False,
+                              batch_size=64,
                               shuffle=True)
+
+validation_data = DataGenerator(im_path="dicom-images-train/*/*/*.dcm",
+                              rle_csv="train-rle.csv", testing=True,
+                              batch_size=64,
+                              shuffle=False)
 
 model = unet_model()
 
@@ -29,6 +35,6 @@ tensorboard_checkpoint = K.callbacks.TensorBoard(
 
 model.fit_generator(training_data,
               epochs=30,
-              validation_data=(imgs_validation, msks_validation),
+              validation_data=validation_data,
               verbose=1, shuffle=True,
-              callbacks=[moel_checkpoint, tensorboard_checkpoint])
+              callbacks=[model_checkpoint, tensorboard_checkpoint])

@@ -61,8 +61,11 @@ def unet_model():
 
     num_chan_in = 1
     num_chan_out = 1
+    fms=32
+    dropout=0.2
+    concat_axis=-1
 
-    inputs = K.layers.Input([num_chan_in, None, None], name="CXR")
+    inputs = K.layers.Input([None, None, num_chan_in], name="CXR")
 
     # Convolution parameters
     params = dict(kernel_size=(3, 3), activation="relu",
