@@ -119,6 +119,7 @@ class DataGenerator(K.utils.Sequence):
 
         return X, y
 
+if __name__ == "__main__":
 
-training_data = DataGenerator(im_path='dicom-images-train/*/*/*.dcm', rle_csv="train-rle.csv", batch_size=64,shuffle=False)
-images, masks = training_data.__getitem__(1)
+    training_data = DataGenerator(im_path='dicom-images-train/*/*/*.dcm', rle_csv="train-rle.csv", batch_size=64,shuffle=False)
+    images, masks = training_data.__getitem__(1)
