@@ -12,12 +12,27 @@ class DataGenerator(K.utils.Sequence):
     """
     Generates data for Keras
     """
-    def __init__(self, im_path, rle_csv, batch_size=32, shuffle=True):
+    def __init__(self, im_path, rle_csv, testing=False, batch_size=32, shuffle=True):
         """
         Initialization
         """
         self.batch_size = batch_size
-        self.im_paths = sorted(glob.glob(im_path))
+
+        all_paths = np.array(sorted(glob.glob(im_path)))
+
+        np.random.seed(816)
+        idxList = np.arange(len(all_paths))  # List of file indices
+        randomIdx = np.random.random(len(all_paths))  # List of random numbers
+        # Random number go from 0 to 1. So anything above
+        # self.train_split is in the validation list.
+        trainIdx = idxList[randomIdx < 0.85]
+
+        validateIdx = idxList[randomIdx >= 0.85]
+
+        if testing:
+            self.im_paths = all_paths[validateIdx]
+        else:
+            self.im_paths = all_paths[trainIdx]
 
         self.im_path = im_path
         self.mask_df = pd.read_csv(rle_csv, index_col='ImageId')
@@ -121,5 +136,5 @@ class DataGenerator(K.utils.Sequence):
 
 if __name__ == "__main__":
 
-    training_data = DataGenerator(im_path='dicom-images-train/*/*/*.dcm', rle_csv="train-rle.csv", batch_size=64,shuffle=False)
+    training_data = DataGenerator(im_path='dicom-images-train/*/*/*.dcm', rle_csv="train-rle.csv", testing=False, batch_size=64,shuffle=False)
     images, masks = training_data.__getitem__(1)
