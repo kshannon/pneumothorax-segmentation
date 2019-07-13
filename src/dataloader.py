@@ -13,7 +13,7 @@ class DataGenerator(K.utils.Sequence):
     """
     Generates data for Keras
     """
-    def __init__(self, im_path, rle_csv, testing=False, batch_size=32, shuffle=True):
+    def __init__(self, im_path, rle_csv, testing=False, batch_size=32, height=1024, width=1024, shuffle=True):
         """
         Initialization
         """
@@ -85,8 +85,8 @@ class DataGenerator(K.utils.Sequence):
         self.im_path = im_path
         self.mask_df = pd.read_csv(rle_csv, index_col='ImageId')
 
-        self.height = 1024
-        self.width = 1024
+        self.height = height
+        self.width = width
 
         self.shuffle = shuffle
         self.on_epoch_end()
@@ -133,7 +133,7 @@ class DataGenerator(K.utils.Sequence):
         current_position = 0
         for index, start in enumerate(starts):
             current_position += start
-            mask[current_position:current_position+lengths[index]] = 255
+            mask[current_position:current_position+lengths[index]] = 255 #255 for white pixel, 0 is a black pixel
             current_position += lengths[index]
 
         return mask.reshape(self.width, self.height).T  # Because mask is rotated
@@ -163,14 +163,14 @@ class DataGenerator(K.utils.Sequence):
 
                 y[idx, :, :, 0] = np.zeros((self.height, self.width))
                 for msk_idx in range(num_masks):
-                    rle_string = self.mask_df[self.mask_df .index == img_name].values[msk_idx][0]
+                    rle_string = self.mask_df[self.mask_df.index == img_name].values[msk_idx][0]
                     y[idx, :, :, 0] += self.rle2mask(rle_string)
 
             elif num_masks == 0:
 
                 rle_string = self.mask_df[self.mask_df.index == img_name].values[0][0]
 
-                if rle_string == " -1" or rle_string == " -1":
+                if rle_string == " -1" or rle_string == "-1":
                     y[idx, :, :, 0] = np.zeros((self.height, self.width))
 
                     num_masks_array[idx] = 0
