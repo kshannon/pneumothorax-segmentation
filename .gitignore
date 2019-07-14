@@ -3,6 +3,7 @@
 ## Add custom entries below here.
 ##
 data/
+models/
 
 ##
 ## Python Section - See https://github.com/github/gitignore/blob/master/Python.gitignore
