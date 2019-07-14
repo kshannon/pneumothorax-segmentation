@@ -7,13 +7,13 @@ import glob
 import os
 import pydicom
 import pandas as pd
-
+import cv2
 
 class DataGenerator(K.utils.Sequence):
     """
     Generates data for Keras
     """
-    def __init__(self, im_path, rle_csv, testing=False, batch_size=32, height=1024, width=1024, shuffle=True):
+    def __init__(self, im_path, rle_csv, testing=False, batch_size=32, height=512, width=512, shuffle=True):
         """
         Initialization
         """
@@ -150,8 +150,11 @@ class DataGenerator(K.utils.Sequence):
         # Generate data
         for idx, im_path in enumerate(list_IDs_im):
 
-            im = pydicom.dcmread(im_path).pixel_array
-            X[idx, :, :, 0] = (im - np.mean(im)) / np.std(im)
+            im = np.array(pydicom.dcmread(im_path).pixel_array, dtype=float)
+            im = (im - np.mean(im)) / np.std(im)
+            im = cv2.resize(im, (self.height, self.width))            
+            
+            X[idx, :, :, 0] = im
 
             img_name = os.path.splitext(im_path)[0].split("/")[-1]
 
@@ -166,7 +169,7 @@ class DataGenerator(K.utils.Sequence):
                     rle_string = self.mask_df[self.mask_df.index == img_name].values[msk_idx][0]
                     y[idx, :, :, 0] += self.rle2mask(rle_string)
 
-            elif num_masks == 0:
+            elif (num_masks == 0) and (len(self.mask_df[self.mask_df.index == img_name].values) > 0):
 
                 rle_string = self.mask_df[self.mask_df.index == img_name].values[0][0]
 
