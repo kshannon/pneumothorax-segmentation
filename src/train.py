@@ -6,19 +6,28 @@ from model import dice_coef, soft_dice_coef, unet_model, dice_coef_loss
 
 from dataloader import DataGenerator
 
+learningrate = 1e-1
+height = 512
+width = 512
+batch_size = 32
+
 training_data = DataGenerator(im_path="dicom-images-train/*/*/*.dcm",
                               rle_csv="train-rle.csv", testing=False,
-                              batch_size=16,
+                              batch_size=batch_size,
+                              height=height,
+                              width=width,
                               shuffle=True)
 
 validation_data = DataGenerator(im_path="dicom-images-train/*/*/*.dcm",
                               rle_csv="train-rle.csv", testing=True,
-                              batch_size=16,
+                              batch_size=batch_size,
+                              height=height,
+                              width=width,
                               shuffle=False)
 
 model = unet_model()
 
-opt = K.optimizers.Adam(lr=1e-1)
+opt = K.optimizers.Adam(lr=learningrate)
 model.compile(optimizer=opt,loss=dice_coef_loss,
               metrics=[dice_coef, soft_dice_coef])
 

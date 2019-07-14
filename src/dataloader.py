@@ -13,7 +13,7 @@ class DataGenerator(K.utils.Sequence):
     """
     Generates data for Keras
     """
-    def __init__(self, im_path, rle_csv, testing=False, batch_size=32, height=512, width=512, shuffle=True):
+    def __init__(self, im_path, rle_csv, testing=False, batch_size=32, height=1024, width=1024, shuffle=True):
         """
         Initialization
         """
