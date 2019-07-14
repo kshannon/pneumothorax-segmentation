@@ -39,7 +39,7 @@ def mask2rle(img, width, height):
     return " ".join(rle)
 
 
-with open('./submission.csv', 'w', newline='') as outfile:
+with open('../submissions/submission.csv', 'w', newline='') as outfile:
     writer = csv.writer(outfile)
     writer.writerow(['ImageId','EncodedPixels'])
 
