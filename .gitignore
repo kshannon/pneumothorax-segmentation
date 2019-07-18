@@ -4,6 +4,7 @@
 ##
 data/
 models/
+.DS_Store
 
 ##
 ## Python Section - See https://github.com/github/gitignore/blob/master/Python.gitignore
