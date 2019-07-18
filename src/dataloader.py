@@ -138,6 +138,26 @@ class DataGenerator(K.utils.Sequence):
 
         return mask.reshape(self.width, self.height).T  # Because mask is rotated
 
+    def mask_validation(self, mask_flag):
+        mask = {}
+        missing = []
+        for n, _id in enumerate(train_fns):
+            image_id = (_id.split('/')[-1][:-4])
+
+            if image_id in df.index:
+                if type(df.loc[image_id, 'EncodedPixels'] )== str:
+                    mask[image_id] = df.loc[image_id, 'EncodedPixels']
+                else:
+                    mask[image_id]= df.loc[image_id, 'EncodedPixels'].values.tolist()
+
+            else:
+                missing.append(image_id)
+            
+        if mask_flag == 1:
+            return {k:v for k, v in mask.items() if type(v) != str}
+        else:
+            return mask
+
     def data_generation(self, list_IDs_im):
         """
         Generates data containing batch_size samples
