@@ -7,18 +7,18 @@ from model import dice_coef, soft_dice_coef, unet_model, dice_coef_loss
 from dataloader import DataGenerator
 
 learningrate = 1e-2
-height = 512
-width = 512
+height = 256
+width = 256
 batch_size = 32
 
-training_data = DataGenerator(im_path="dicom-images-train/*/*/*.dcm",
+training_data = DataGenerator(img_path="../data/train/*.dcm",
                               rle_csv="train-rle.csv", validation=False,
                               batch_size=batch_size,
                               height=height,
                               width=width,
                               shuffle=True)
 
-validation_data = DataGenerator(im_path="dicom-images-train/*/*/*.dcm",
+validation_data = DataGenerator(img_path="../data/train/*.dcm",
                               rle_csv="train-rle.csv", validation=True,
                               batch_size=batch_size,
                               height=1024,
