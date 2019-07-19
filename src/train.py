@@ -12,14 +12,14 @@ width = 512
 batch_size = 32
 
 training_data = DataGenerator(im_path="dicom-images-train/*/*/*.dcm",
-                              rle_csv="train-rle.csv", testing=False,
+                              rle_csv="train-rle.csv", validation=False,
                               batch_size=batch_size,
                               height=height,
                               width=width,
                               shuffle=True)
 
 validation_data = DataGenerator(im_path="dicom-images-train/*/*/*.dcm",
-                              rle_csv="train-rle.csv", testing=True,
+                              rle_csv="train-rle.csv", validation=True,
                               batch_size=batch_size,
                               height=1024,
                               width=1024,
