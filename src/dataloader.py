@@ -17,25 +17,24 @@ class DataGenerator(K.utils.Sequence):
     """
     Generates data for Keras
     """
-    def __init__(self, img_path, rle_csv, validation=False, batch_size=32, height=1024, width=1024, shuffle=True, mask_flag=False):
+    def __init__(self, img_path, rle_csv, validation=False, batch_size=32, height=1024, width=1024, shuffle=True, train_class_one=False):
         """
         Initialization
         """
 
-        all_paths = np.array(sorted(glob.glob(img_path)))
+        self.img_path = img_path
+        self.rle_df = pd.read_csv(rle_csv, index_col='ImageId')
+        self.train_class_one = train_class_one
+        
+        all_paths = np.array(sorted(glob.glob(self.img_path)))
         if validation:
             self.img_paths = self.test_train_split(all_paths)
         else:
             self.img_paths = self.test_train_split(all_paths,validation=False)
 
-        self.img_path = img_path
-        self.mask_df = pd.read_csv(rle_csv, index_col='ImageId')
-
         self.height = height
         self.width = width
         self.batch_size = batch_size
-        self.mask_flag = mask_flag
-
         self.shuffle = shuffle
         self.on_epoch_end()
 
@@ -51,7 +50,6 @@ class DataGenerator(K.utils.Sequence):
         """
         # Generate indexes of the batch
         indexes = self.indexes[index*self.batch_size:min((index+1)*self.batch_size,len(self.img_paths))]
-
         # Find list of IDs
         list_IDs_im = [self.img_paths[k] for k in indexes]
         # validate data integrity
@@ -69,29 +67,48 @@ class DataGenerator(K.utils.Sequence):
         if self.shuffle == True:
             np.random.shuffle(self.indexes)
 
+
     def rle2mask(self, rle):
         """
         Convert run-length encoding string to image mask
         """
-
         mask= np.zeros(self.width * self.height)
         array = np.asarray([int(x) for x in rle.split()])
         starts = array[0::2]
         lengths = array[1::2]
-
         current_position = 0
         for index, start in enumerate(starts):
             current_position += start
             mask[current_position:current_position+lengths[index]] = 255 #255 for white pixel, 0 is a black pixel
             current_position += lengths[index]
-
         return mask.reshape(self.width, self.height).T  # Because mask is rotated
 
 
     def test_train_split(self,all_paths,validation=True):
         """
-        If testing flag is passed split data into test/train splits
+        1. If train_class_one is True then only return class 
+        2. If testing flag is passed split data into test/train splits
         """
+
+        if self.train_class_one:
+            # make a copy of the mask_df, find the class 1's and make a list of their dcm names
+            class1_df = self.rle_df.copy()
+            class1_df = class1_df.reset_index()
+            class1_df['ImageId'] = class1_df['ImageId'].apply(lambda x: '../data/train/' + x + '.dcm')
+            class1_df = class1_df[class1_df[' EncodedPixels'] != ' -1']
+            class1_list = class1_df['ImageId'].tolist()
+            assert len(class1_list) == 3286 #num of known class 1
+            
+            mask = np.isin(all_paths, class1_list) #create a mask to screen all_paths ndarray for only class 1
+            assert len(set(class1_list)) == (mask == 1).sum() #check unique class 1's in DF equal same in train dir should be: 2379
+            # total train data count - class 1 duplicates via set(ImageID) should equal the known class 1 count - class_1 path mask
+            assert self.rle_df.shape[0] - len(set(self.rle_df.index.tolist())) == 3286 - (mask == 1).sum()
+            
+            class1_paths = all_paths[mask]
+            assert sorted(class1_paths.tolist()) == sorted(set(class1_list)) #ensure class1_paths masks is correct
+
+            all_paths = class1_paths
+
         np.random.seed(816)
         idxList = np.arange(len(all_paths))  # List of file indices
         randomIdx = np.random.random(len(all_paths))  # List of random numbers
@@ -116,17 +133,17 @@ class DataGenerator(K.utils.Sequence):
         mask = {}
         for n, _id in enumerate(dcm_paths):
             image_id = (_id.split('/')[-1][:-4])
-            if image_id in self.mask_df.index:
-                if type(self.mask_df.loc[image_id, ' EncodedPixels'] ) == str:
-                    mask[image_id] = [self.mask_df.loc[image_id, ' EncodedPixels']]  
+            if image_id in self.rle_df.index:
+                if type(self.rle_df.loc[image_id, ' EncodedPixels'] ) == str:
+                    mask[image_id] = [self.rle_df.loc[image_id, ' EncodedPixels']]  
                 else:
-                    mask[image_id]= self.mask_df.loc[image_id, ' EncodedPixels'].values.tolist()
+                    mask[image_id]= self.rle_df.loc[image_id, ' EncodedPixels'].values.tolist()
             else:
                 continue #missing dcm file!
-        if self.mask_flag == True:
-            return {k:v for k, v in mask.items() if type(v) != str}
-        else:
-            return mask
+        # if self.train_class_one == True:
+        #     return {k:v for k, v in mask.items() if type(v) != '-1' or type(v) != ' -1'}
+        # else:
+        return mask
 
 
     def data_generation(self, data_dict):
@@ -150,7 +167,7 @@ class DataGenerator(K.utils.Sequence):
 
             img_name = os.path.splitext(img_path)[0].split("/")[-1]
 
-            # num_masks = self.mask_df[self.mask_df.index == img_name].values()
+            # num_masks = self.rle_df[self.rle_df.index == img_name].values()
             num_masks = data_dict[k]
 
             num_masks_array[idx] = len(num_masks)
@@ -158,12 +175,12 @@ class DataGenerator(K.utils.Sequence):
             if len(num_masks) > 1:
                 y[idx, :, :, 0] = np.zeros((self.height, self.width))
                 for msk_idx in range(len(num_masks)):
-                    rle_string = self.mask_df[self.mask_df.index == img_name].values[msk_idx][0]
+                    rle_string = self.rle_df[self.rle_df.index == img_name].values[msk_idx][0]
                     y[idx, :, :, 0] += self.rle2mask(rle_string)
 
-            elif (num_masks == 0) and (len(self.mask_df[self.mask_df.index == img_name].values) > 0):
+            elif (num_masks == 0) and (len(self.rle_df[self.rle_df.index == img_name].values) > 0):
 
-                rle_string = self.mask_df[self.mask_df.index == img_name].values[0][0]
+                rle_string = self.rle_df[self.rle_df.index == img_name].values[0][0]
 
                 if rle_string == " -1" or rle_string == "-1":
                     y[idx, :, :, 0] = np.zeros((self.height, self.width))
@@ -182,5 +199,5 @@ class DataGenerator(K.utils.Sequence):
 
 if __name__ == "__main__":
 
-    training_data = DataGenerator(img_path='../data/train/*.dcm', rle_csv="../data/train-rle.csv", validation=False, batch_size=64,shuffle=False)
+    training_data = DataGenerator(img_path='../data/train/*.dcm', rle_csv="../data/train-rle.csv", validation=False, batch_size=64,shuffle=False, train_class_one=True)
     images, masks = training_data.__getitem__(1)

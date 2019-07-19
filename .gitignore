@@ -5,7 +5,8 @@
 data/
 models/
 .DS_Store
-
+tb_logs/
+src/tb_logs/
 ##
 ## Python Section - See https://github.com/github/gitignore/blob/master/Python.gitignore
 ##

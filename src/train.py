@@ -12,18 +12,20 @@ width = 256
 batch_size = 32
 
 training_data = DataGenerator(img_path="../data/train/*.dcm",
-                              rle_csv="train-rle.csv", validation=False,
+                              rle_csv="../data/train-rle.csv", validation=False,
                               batch_size=batch_size,
                               height=height,
                               width=width,
-                              shuffle=True)
+                              shuffle=True,
+                              train_class_one=True)
 
 validation_data = DataGenerator(img_path="../data/train/*.dcm",
-                              rle_csv="train-rle.csv", validation=True,
+                              rle_csv="../data/train-rle.csv", validation=True,
                               batch_size=batch_size,
                               height=1024,
                               width=1024,
-                              shuffle=False)
+                              shuffle=False,
+                              train_class_one=True)
 
 model = unet_model()
 
