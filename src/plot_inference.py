@@ -12,10 +12,11 @@ import matplotlib.pyplot as plt
 
 height = 256
 width = 256
+rows = 4
 
 validation_data = DataGenerator(img_path="../data/train/*.dcm",
                               rle_csv="../data/train-rle.csv", validation=True,
-                              batch_size=100,
+                              batch_size=rows,
                               height=height,
                               width=width,
                               shuffle=True,
@@ -28,7 +29,7 @@ X, y = validation_data.__getitem__(idx)
 
 pred = model.predict(X)
 
-rows = 4
+
 for ii in range(rows):
 
     plt.subplot(rows,3,1+ii*3)

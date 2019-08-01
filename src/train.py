@@ -22,8 +22,8 @@ training_data = DataGenerator(img_path="../data/train/*.dcm",
 validation_data = DataGenerator(img_path="../data/train/*.dcm",
                               rle_csv="../data/train-rle.csv", validation=True,
                               batch_size=batch_size,
-                              height=1024,
-                              width=1024,
+                              height=height,
+                              width=width,
                               shuffle=False,
                               train_class_one=True)
 
