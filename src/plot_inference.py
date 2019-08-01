@@ -41,7 +41,7 @@ for ii in range(rows):
     if ii==0:
         plt.title("Ground truth")
     plt.subplot(rows,3,3+ii*3)
-    plt.imshow(pred[ii,:,:,0])
+    plt.imshow(np.round(pred[ii,:,:,0]))
     if ii==0:
         plt.title("Prediction")
 
