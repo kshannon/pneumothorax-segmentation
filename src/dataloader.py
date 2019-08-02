@@ -68,20 +68,28 @@ class DataGenerator(K.utils.Sequence):
             np.random.shuffle(self.indexes)
 
 
-    def rle2mask(self, rle):
+    def rle2mask(self, rle, height=1024, width=1024):
         """
         Convert run-length encoding string to image mask
         """
-        mask= np.zeros(self.width * self.height)
+        mask= np.zeros(height * width)
         array = np.asarray([int(x) for x in rle.split()])
         starts = array[0::2]
         lengths = array[1::2]
         current_position = 0
+        
         for index, start in enumerate(starts):
             current_position += start
             mask[current_position:current_position+lengths[index]] = 255 #255 for white pixel, 0 is a black pixel
             current_position += lengths[index]
-        return mask.reshape(self.width, self.height).T  # Because mask is rotated
+
+        unique_elements, counts_elements = np.unique(mask, return_counts=True)
+        print("Frequency of unique values of the said array:")
+        print(np.asarray((unique_elements, counts_elements)))
+        # return mask.reshape(height, 1024).T  # Because mask is rotated
+        img = mask.reshape(height, width).T
+        resized_img = cv2.resize(img, dsize=(self.width, self.height), interpolation=cv2.INTER_CUBIC)
+        return resized_img
 
 
     def test_train_split(self,all_paths,validation=True):
