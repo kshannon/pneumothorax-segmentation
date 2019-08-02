@@ -5,12 +5,19 @@
 # them into the CSV. this should be done ether before or after RLE encoding
 
 from keras.models import load_model
+from model import dice_coef, soft_dice_coef, unet_model, dice_coef_loss
 import numpy as np
 import sys
+import os
+import csv
 import glob
+import pydicom
+from tqdm import tqdm
 
-model = load_model(sys.argv[0])
-test_dir = sys.argv[1]
+
+custom_objects = {"dice_coef":dice_coef,"dice_coef_loss":dice_coef_loss,"soft_dice_coef":soft_dice_coef}
+model = load_model(sys.argv[1], custom_objects=custom_objects)
+test_dir = sys.argv[2]
 
 
 def mask2rle(img, width, height):
@@ -39,20 +46,27 @@ def mask2rle(img, width, height):
     return " ".join(rle)
 
 
-with open('../submissions/submission.csv', 'w', newline='') as outfile:
+with open('../submissions/submission.csv', 'a+', newline='') as outfile:
     writer = csv.writer(outfile)
     writer.writerow(['ImageId','EncodedPixels'])
 
-    for filename in glob.iglob(test_dir + '**/*.dcm', recursive=True):
-        img_id = filename.split('/')[-1]
-        msk = model.predict(filename)
+    for filename in tqdm(os.listdir('../data/test/')): 
 
+        img = np.array(pydicom.dcmread('../data/test/' + filename).pixel_array, dtype=float)
+        mean = img.mean()
+        std = img.std()
+        
+        #perfmorming standardization here on the array by sub the mean and dividing the s.d.
+        standardized_array = np.divide(np.subtract(img,mean),std)
+        
+        expanded_array = standardized_array[np.newaxis, ..., np.newaxis]
+        msk = model.predict(expanded_array)
+        
         if not np.any(msk) == True:
-            writer.writerow(dicom_name, '-1') #case for no pnuemothorax found
+            writer.writerow([filename, '-1']) #case for no pnuemothorax found
         else:
             rle = mask2rle(msk, 1024, 1024)
-            writer.writerow(img_id, rle) 
-
+            writer.writerow([filename, rle]) 
 
 
 
