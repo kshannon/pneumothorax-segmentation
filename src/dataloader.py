@@ -84,10 +84,6 @@ class DataGenerator(K.utils.Sequence):
             mask[current_position:current_position+lengths[index]] = 1 #1 for white pixel, 0 is a black pixel
             current_position += lengths[index]
 
-        unique_elements, counts_elements = np.unique(mask, return_counts=True)
-        print("Frequency of unique values of the said array:")
-        print(np.asarray((unique_elements, counts_elements)))
-        # return mask.reshape(height, 1024).T  # Because mask is rotated
         img = mask.reshape(1024, 1024).T
         if self.width != 1024 and self.height != 1024:
             resized_img = cv2.resize(img, dsize=(self.width, self.height), interpolation=cv2.INTER_CUBIC)

@@ -6,10 +6,11 @@ from model import dice_coef, soft_dice_coef, unet_model, dice_coef_loss
 
 from dataloader import DataGenerator
 
-learningrate = 1e-2
+num_epochs = 100
+learningrate = 5e-3
 height = 256
 width = 256
-batch_size = 32
+batch_size = 64
 
 training_data = DataGenerator(img_path="../data/train/*.dcm",
                               rle_csv="../data/train-rle.csv", validation=False,
@@ -46,7 +47,7 @@ tensorboard_checkpoint = K.callbacks.TensorBoard(
             write_graph=True, write_images=True)
 
 model.fit_generator(training_data,
-              epochs=30,
+              epochs=num_epochs,
               validation_data=validation_data,
               verbose=1, shuffle=True,
               callbacks=[model_checkpoint, tensorboard_checkpoint])

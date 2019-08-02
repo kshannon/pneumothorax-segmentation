@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 height = 256
 width = 256
-rows = 4
+rows = 5
 
 validation_data = DataGenerator(img_path="../data/train/*.dcm",
                               rle_csv="../data/train-rle.csv", validation=True,
