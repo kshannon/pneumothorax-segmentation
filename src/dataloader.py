@@ -88,8 +88,11 @@ class DataGenerator(K.utils.Sequence):
         print(np.asarray((unique_elements, counts_elements)))
         # return mask.reshape(height, 1024).T  # Because mask is rotated
         img = mask.reshape(1024, 1024).T
-        resized_img = cv2.resize(img, dsize=(self.width, self.height), interpolation=cv2.INTER_CUBIC)
-        return resized_img
+        if self.width != 1024 and self.height != 1024:
+            resized_img = cv2.resize(img, dsize=(self.width, self.height), interpolation=cv2.INTER_CUBIC)
+            return resized_img
+        else:
+            return img
 
 
     def test_train_split(self,all_paths,validation=True):
