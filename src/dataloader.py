@@ -68,11 +68,11 @@ class DataGenerator(K.utils.Sequence):
             np.random.shuffle(self.indexes)
 
 
-    def rle2mask(self, rle, height=1024, width=1024):
+    def rle2mask(self, rle):
         """
         Convert run-length encoding string to image mask
         """
-        mask= np.zeros(height * width)
+        mask= np.zeros(1024 * 1024)
         array = np.asarray([int(x) for x in rle.split()])
         starts = array[0::2]
         lengths = array[1::2]
@@ -87,7 +87,7 @@ class DataGenerator(K.utils.Sequence):
         print("Frequency of unique values of the said array:")
         print(np.asarray((unique_elements, counts_elements)))
         # return mask.reshape(height, 1024).T  # Because mask is rotated
-        img = mask.reshape(height, width).T
+        img = mask.reshape(1024, 1024).T
         resized_img = cv2.resize(img, dsize=(self.width, self.height), interpolation=cv2.INTER_CUBIC)
         return resized_img
 
