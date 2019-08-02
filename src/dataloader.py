@@ -25,7 +25,7 @@ class DataGenerator(K.utils.Sequence):
         self.img_path = img_path
         self.rle_df = pd.read_csv(rle_csv, index_col='ImageId')
         self.train_class_one = train_class_one
-        
+
         all_paths = np.array(sorted(glob.glob(self.img_path)))
         if validation:
             self.img_paths = self.test_train_split(all_paths)
@@ -68,6 +68,7 @@ class DataGenerator(K.utils.Sequence):
             np.random.shuffle(self.indexes)
 
 
+
     def rle2mask(self, rle):
         """
         Convert run-length encoding string to image mask
@@ -77,10 +78,10 @@ class DataGenerator(K.utils.Sequence):
         starts = array[0::2]
         lengths = array[1::2]
         current_position = 0
-        
+
         for index, start in enumerate(starts):
             current_position += start
-            mask[current_position:current_position+lengths[index]] = 255 #255 for white pixel, 0 is a black pixel
+            mask[current_position:current_position+lengths[index]] = 1 #1 for white pixel, 0 is a black pixel
             current_position += lengths[index]
 
         unique_elements, counts_elements = np.unique(mask, return_counts=True)
@@ -97,7 +98,7 @@ class DataGenerator(K.utils.Sequence):
 
     def test_train_split(self,all_paths,validation=True):
         """
-        1. If train_class_one is True then only return class 
+        1. If train_class_one is True then only return class
         2. If testing flag is passed split data into test/train splits
         """
 
@@ -109,12 +110,12 @@ class DataGenerator(K.utils.Sequence):
             class1_df = class1_df[class1_df[' EncodedPixels'] != ' -1']
             class1_list = class1_df['ImageId'].tolist()
             assert len(class1_list) == 3286 #num of known class 1
-            
+
             mask = np.isin(all_paths, class1_list) #create a mask to screen all_paths ndarray for only class 1
             assert len(set(class1_list)) == (mask == 1).sum() #check unique class 1's in DF equal same in train dir should be: 2379
             # total train data count - class 1 duplicates via set(ImageID) should equal the known class 1 count - class_1 path mask
             assert self.rle_df.shape[0] - len(set(self.rle_df.index.tolist())) == 3286 - (mask == 1).sum()
-            
+
             class1_paths = all_paths[mask]
             assert sorted(class1_paths.tolist()) == sorted(set(class1_list)) #ensure class1_paths masks is correct
 
@@ -133,20 +134,20 @@ class DataGenerator(K.utils.Sequence):
         else:
             return all_paths[validateIdx]
 
-    
+
     def data_validator(self,dcm_paths):
         """
-        1. Ensure all dcm imgs in folder exist in the CSV. 
+        1. Ensure all dcm imgs in folder exist in the CSV.
         2. Provide ability to filter DICOM images by class (e.g. RLE of '-1')
-        3. Return a dict object with a key[dcm_name] : value[list of string RLEs] 
+        3. Return a dict object with a key[dcm_name] : value[list of string RLEs]
         """
-       
+
         mask = {}
         for n, _id in enumerate(dcm_paths):
             image_id = (_id.split('/')[-1][:-4])
             if image_id in self.rle_df.index:
                 if type(self.rle_df.loc[image_id, ' EncodedPixels'] ) == str:
-                    mask[image_id] = [self.rle_df.loc[image_id, ' EncodedPixels']]  
+                    mask[image_id] = [self.rle_df.loc[image_id, ' EncodedPixels']]
                 else:
                     mask[image_id]= self.rle_df.loc[image_id, ' EncodedPixels'].values.tolist()
             else:
@@ -172,8 +173,8 @@ class DataGenerator(K.utils.Sequence):
             img_path = '../data/train/' + k + '.dcm'
             im = np.array(pydicom.dcmread(img_path).pixel_array, dtype=float)
             im = (im - np.mean(im)) / np.std(im)
-            im = cv2.resize(im, (self.height, self.width))            
-            
+            im = cv2.resize(im, (self.height, self.width))
+
             X[idx, :, :, 0] = im
 
             img_name = os.path.splitext(img_path)[0].split("/")[-1]
@@ -183,28 +184,29 @@ class DataGenerator(K.utils.Sequence):
 
             num_masks_array[idx] = len(num_masks)
 
+
             if len(num_masks) > 1:
-                y[idx, :, :, 0] = np.zeros((self.height, self.width))
+                y_temp = np.zeros((self.height, self.width))
                 for msk_idx in range(len(num_masks)):
                     rle_string = self.rle_df[self.rle_df.index == img_name].values[msk_idx][0]
-                    y[idx, :, :, 0] += self.rle2mask(rle_string)
+                    y_temp += self.rle2mask(rle_string)
 
             elif (num_masks == 0) and (len(self.rle_df[self.rle_df.index == img_name].values) > 0):
 
                 rle_string = self.rle_df[self.rle_df.index == img_name].values[0][0]
 
                 if rle_string == " -1" or rle_string == "-1":
-                    y[idx, :, :, 0] = np.zeros((self.height, self.width))
+                    y_temp = np.zeros((self.height, self.width))
                     num_masks_array[idx] = 0
                 else:
-                    y[idx, :, :, 0] = self.rle2mask(rle_string)
+                    y_temp = self.rle2mask(rle_string)
 
             else:
-                y[idx, :, :, 0] = np.zeros((self.height, self.width))
+                y_temp = np.zeros((self.height, self.width))
                 num_masks_array[idx] = 0
 
-
-        y[y>1] = 1  # If mask value > 1, then it is 1.
+            y_temp[y_temp > 1] = 1.0
+            y[idx, :, :, 0] = y_temp
 
         return X, y
 

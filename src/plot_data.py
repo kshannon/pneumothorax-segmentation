@@ -3,8 +3,8 @@ from dataloader import DataGenerator
 
 import matplotlib.pyplot as plt
 
-height = 1024
-width = 1024
+height = 256
+width = 256
 rows = 4
 
 validation_data = DataGenerator(img_path="../data/train/*.dcm",
