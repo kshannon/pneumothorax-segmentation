@@ -17,6 +17,7 @@ validation_data = DataGenerator(img_path="../data/train/*.dcm",
 
 idx = np.random.randint(0, validation_data.__len__())
 X, y = validation_data.__getitem__(idx)
+assert(np.unique(y) == [0,1]) #ensure we have rounded predictions of only 0 and 1
 
 for ii in range(rows):
 

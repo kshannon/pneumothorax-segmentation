@@ -86,7 +86,7 @@ class DataGenerator(K.utils.Sequence):
 
         img = mask.reshape(1024, 1024).T
         if self.width != 1024 and self.height != 1024:
-            resized_img = cv2.resize(img, dsize=(self.width, self.height), interpolation=cv2.INTER_CUBIC)
+            resized_img = cv2.resize(img, dsize=(self.width, self.height), interpolation=cv2.INTER_NEAREST)
             return resized_img
         else:
             return img
