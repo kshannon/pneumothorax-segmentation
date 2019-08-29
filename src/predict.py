@@ -80,11 +80,11 @@ with open('../submissions/submission.csv', 'a+', newline='') as outfile:
         msk = np.squeeze(np.round(msk)) #remove axis w/ dims of 1, round mask for given probbabilties to [0,1]
         
         if not np.any(msk) == True:
-            writer.writerow([filename, '-1']) #case for no pnuemothorax found
+            writer.writerow([filename[:-4], '-1']) #case for no pnuemothorax found
             print('none found...')
         else:
             rle = mask2rle(msk, 1024, 1024)
-            writer.writerow([filename, rle])
+            writer.writerow([filename[:-4], rle])
 
         # if plot != False:
         #     plt.imshow(img.T, cmap=plt.cm.bone)
